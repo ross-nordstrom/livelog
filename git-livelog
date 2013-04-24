@@ -1,16 +1,20 @@
 #!/bin/bash
 
 read -p "How many log lines should be shown? (More lines means more jitter during refreshes)" num
-if ["$num" == ''] || ["$num" <= 0]; then
-    let num=30
+echo $num
+if [ "$num" -le 0 ]
+then
+    num='30'
 fi
 echo "Limiting to $num lines!"
 
 read -p "How frequently should I poll the remote? (in seconds)" period
-if ["$period" == ''] || ["$period" <= 0]; then
-    let period=1
-elif [period >= 300]; then
-    let period=300
+if [ "$period" -le 0 ]
+then
+    period='1'
+elif [ "$period" -ge 300 ]
+then
+    period='300'
 fi
 echo "Polling every $period seconds!"
  
