@@ -6,7 +6,7 @@ if ["$num" == ''] || ["$num" <= 0]; then
 fi
 echo "Limiting to $num lines!"
 
-read -p "How frequently should I poll the remote?" period
+read -p "How frequently should I poll the remote? (in seconds)" period
 if ["$period" == ''] || ["$period" <= 0]; then
     let period=1
 elif [period >= 300]; then
@@ -20,5 +20,5 @@ do
     git fetch
     clear
     git --no-pager log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%ci) %C(bold blue)<%an>%Creset' --abbrev-commit --date=relative --all -$num
-    sleep 1
+    sleep $period
 done
