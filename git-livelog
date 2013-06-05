@@ -1,29 +1,69 @@
 #!/bin/bash
 
-read -p "How many log lines should be shown? (More lines means more jitter during refreshes)" num
-echo $num
-if [ "$num" -le 0 ]
-then
-    num='30'
-fi
-echo "Limiting to $num lines!"
+#command line options
+#
+# -l    number of lines to display
+# -t    refresh time in seconds
+#
+#
 
-read -p "How frequently should I poll the remote? (in seconds)" period
-if [ "$period" -le 0 ]
+
+function print_help {
+    echo "--Git Livelog script--"
+    echo "Usage:"
+    echo "-h display help"
+    echo "-t set refresh timeout (default is 300 seconds)"
+    echo "-l set number of lines to display (default is 30 lines)"
+
+}
+
+function is_int() { return $(test "$@" -eq "$@" > /dev/null 2>&1); } 
+
+
+#set intelligent defaults
+numlines='30'
+timeoutperiod='300'
+
+#parse command line options, if there are any
+if [ $# -gt 0 ] 
 then
-    period='1'
-elif [ "$period" -ge 300 ]
-then
-    period='300'
+    #parse options
+    while getopts "hl:t:" opt; do
+    case "$opt" in
+    h)
+        print_help
+        exit 0
+        ;;
+    t)
+        if $(is_int "$OPTARG");
+        then
+            timeoutperiod=$OPTARG
+        else
+            echo "bad value for option: -t"
+            print_help
+            exit 1
+        fi
+        ;;
+    l)
+        if $(is_int "$OPTARG");
+        then
+            numlines=$OPTARG
+        else
+            echo "bad value for option: -l"
+            print_help
+            exit 1
+        fi
+        ;;
+    esac
+    done
 fi
-echo "Polling every $period seconds!"
- 
+
 # Loop to poll and display latest log (including remote, thanks to git fetch)
 while :
 do
     git fetch
     clear
     pwd
-    git --no-pager log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%ci) %C(bold blue)<%an>%Creset' --abbrev-commit --date=relative --all -$num
-    sleep $period
+    git --no-pager log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%ci) %C(bold blue)<%an>%Creset' --abbrev-commit --date=relative --all -$numlines
+    sleep $timoutperiod
 done
