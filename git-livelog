@@ -12,7 +12,7 @@ function print_help {
     echo "--Git Livelog script--"
     echo "Usage:"
     echo "-h display help"
-    echo "-t set refresh timeout (default is 300 seconds)"
+    echo "-t set refresh period (default is 60 seconds)"
     echo "-l set number of lines to display (default is 30 lines)"
 
 }
@@ -22,7 +22,7 @@ function is_int() { return $(test "$@" -eq "$@" > /dev/null 2>&1); }
 
 #set intelligent defaults
 numlines='30'
-timeoutperiod='300'
+refreshperiod='60'
 
 #parse command line options, if there are any
 if [ $# -gt 0 ] 
@@ -37,7 +37,7 @@ then
     t)
         if $(is_int "$OPTARG");
         then
-            timeoutperiod=$OPTARG
+            refreshperiod=$OPTARG
         else
             echo "bad value for option: -t"
             print_help
@@ -65,5 +65,5 @@ do
     clear
     pwd
     git --no-pager log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%ci) %C(bold blue)<%an>%Creset' --abbrev-commit --date=relative --all -$numlines
-    sleep $timeoutperiod
+    sleep $refreshperiod
 done
