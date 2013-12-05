@@ -4,7 +4,7 @@
 #
 # -l    number of lines to display
 # -t    refresh time in seconds
-#
+# -s    whether or not to show git status as well
 #
 
 
@@ -14,6 +14,7 @@ function print_help {
     echo "-h display help"
     echo "-t set refresh period (default is 60 seconds)"
     echo "-l set number of lines to display (default is 30 lines)"
+    echo "-s [y/n] whether or not to show the git status"
 
 }
 
@@ -23,12 +24,13 @@ function is_int() { return $(test "$@" -eq "$@" > /dev/null 2>&1); }
 #set intelligent defaults
 numlines='30'
 refreshperiod='60'
+showstatus=0
 
 #parse command line options, if there are any
 if [ $# -gt 0 ] 
 then
     #parse options
-    while getopts "hl:t:" opt; do
+    while getopts "hl:t:s:" opt; do
     case "$opt" in
     h)
         print_help
@@ -54,6 +56,14 @@ then
             exit 1
         fi
         ;;
+    s)
+        echo "OPTARG: $OPTARG"
+        if [ "$OPTARG" == "y" ];
+        then
+           showstatus=1
+           echo 'Will show git status'
+        fi
+        ;;
     esac
     done
 fi
@@ -64,6 +74,18 @@ do
     git fetch
     clear
     pwd
+
+    # Dump the formatted git log
     git --no-pager log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%ci) %C(bold blue)<%an>%Creset' --abbrev-commit --date=relative --all -$numlines
+
+    # Conditionally dump the git status
+    if [ $showstatus -gt 0 ];
+    then
+       echo ''
+       echo ''
+       echo '######################### ^ LOG  /// v STATUS ##########################'
+       echo ''
+       git status
+    fi
     sleep $refreshperiod
 done
