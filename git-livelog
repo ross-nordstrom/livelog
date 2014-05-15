@@ -5,6 +5,7 @@
 # -l    number of lines to display
 # -t    refresh time in seconds
 # -s    whether or not to show git status as well
+# -S    whether or not to show git story as well
 #
 
 
@@ -15,6 +16,7 @@ function print_help {
     echo "-t set refresh period (default is 60 seconds)"
     echo "-l set number of lines to display (default is 30 lines)"
     echo "-s [y/n] whether or not to show the git status"
+    echo "-S [y/n] whether or not to show the git story"
 
 }
 
@@ -25,46 +27,55 @@ function is_int() { return $(test "$@" -eq "$@" > /dev/null 2>&1); }
 numlines='30'
 refreshperiod='60'
 showstatus=0
+showstory=0
 
 #parse command line options, if there are any
 if [ $# -gt 0 ] 
 then
     #parse options
-    while getopts "hl:t:s:" opt; do
-    case "$opt" in
-    h)
-        print_help
-        exit 0
-        ;;
-    t)
-        if $(is_int "$OPTARG");
-        then
-            refreshperiod=$OPTARG
-        else
-            echo "bad value for option: -t"
-            print_help
-            exit 1
-        fi
-        ;;
-    l)
-        if $(is_int "$OPTARG");
-        then
-            numlines=$OPTARG
-        else
-            echo "bad value for option: -l"
-            print_help
-            exit 1
-        fi
-        ;;
-    s)
-        echo "OPTARG: $OPTARG"
-        if [ "$OPTARG" == "y" ];
-        then
-           showstatus=1
-           echo 'Will show git status'
-        fi
-        ;;
-    esac
+    while getopts "hl:t:s:S:" opt; do
+      case "$opt" in
+      h)
+         print_help
+         exit 0
+         ;;
+      t)
+         if $(is_int "$OPTARG");
+         then
+               refreshperiod=$OPTARG
+         else
+               echo "bad value for option: -t"
+               print_help
+               exit 1
+         fi
+         ;;
+      l)
+         if $(is_int "$OPTARG");
+         then
+               numlines=$OPTARG
+         else
+               echo "bad value for option: -l"
+               print_help
+               exit 1
+         fi
+         ;;
+      s)
+         echo "OPTARG: $OPTARG"
+         if [ "$OPTARG" == "y" ];
+         then
+            showstatus=1
+            echo 'Will show git status'
+         fi
+         ;;
+      S)
+         echo "OPTARG: $OPTARG"
+         if [ "$OPTARG" == "y" ];
+         then
+            showstory=1
+            echo 'Will show git story'
+         fi
+         ;;
+      esac
     done
 fi
 
@@ -82,10 +93,18 @@ do
     if [ $showstatus -gt 0 ];
     then
        echo ''
-       echo ''
-       echo '######################### ^ LOG  /// v STATUS ##########################'
+       echo '##################################### STATUS ######################################'
        echo ''
        git status
+    fi
+
+    # Conditionally dump the git status
+    if [ $showstory -gt 0 ];
+    then
+       echo ''
+       echo '##################################### STORY  ######################################'
+       echo ''
+       git story
     fi
     sleep $refreshperiod
 done
